@@ -175,7 +175,12 @@ ul {
     margin-bottom: 10px;
     text-decoration: none;
 }
-
-
+#cantidad-carrito{
+    color: white;
+}
+#content-products{
+    display: flex;
+    flex-wrap: wrap;
+}
 
 

@@ -1,3 +1,5 @@
+// import Swal from "sweetalert2";
+
 const carrito = document.getElementById("carrito");
 const platillos = document.getElementById("lista-platillos");
 const listaPlatillos = document.querySelector("#lista-carrito tbody");
@@ -12,32 +14,32 @@ function cargarEventListeners() {
   platillos.addEventListener("click", comprarPlatillo);
   carrito.addEventListener("click", eliminarPlatillo);
   vaciarCarritoBtn.addEventListener("click", vaciarCarrito);
-  document.addEventListener("DOMContentLoaded",  () => {
-    fetchData()
+  document.addEventListener("DOMContentLoaded", () => {
+    fetchData();
+    leerLocalStorage();
   });
 }
 const cargarProductos = (data) => {
-   data.forEach(producto=> {
-       templateProductos.querySelector('h4').textContent = producto.title;
-       templateProductos.querySelector(".imagen-platillo").src = producto.img;
-       templateProductos.querySelector('.precio span').textContent = producto.precio;
-
-       const productos =  templateProductos.cloneNode(true)
-       fragmentProductos.appendChild(productos)
-   })
-   contentProducts.appendChild(fragmentProductos);
-//    console.log(templateProductos.content)
-}
+  data.forEach((producto) => {
+    templateProductos.querySelector("h4").textContent = producto.title;
+    templateProductos.querySelector(".imagen-platillo").src = producto.img;
+    templateProductos.querySelector(".precio span").textContent =
+      producto.precio;
+    templateProductos.querySelector("a").setAttribute("data-id", producto.id);
+    const productos = templateProductos.cloneNode(true);
+    fragmentProductos.appendChild(productos);
+  });
+  contentProducts.appendChild(fragmentProductos);
+};
 const fetchData = async () => {
-    try {
-          const resp = await fetch('js/api.json');
-          const data = await resp.json();
-          
-          cargarProductos(data)
-    } catch (error) {
-        console.log(error)
-    }
+  try {
+    const resp = await fetch("js/api.json");
+    const data = await resp.json();
 
+    cargarProductos(data);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 function comprarPlatillo(e) {
@@ -55,7 +57,13 @@ function leerDatosPlatillo(platillo) {
     precio: platillo.querySelector(".precio span").textContent,
     id: platillo.querySelector("a").getAttribute("data-id"),
   };
-
+  Swal.fire({
+    position: "top-end",
+    icon: "success",
+    title: "Agregado al carrito",
+    showConfirmButton: false,
+    timer: 1500,
+  });
   insertarCarrito(infoPlatillo);
 }
 
@@ -71,9 +79,11 @@ function insertarCarrito(platillo) {
         <a href="#" class="borrar-platillo" data-id="${platillo.id}">X</a>
        </td>
     `;
-  cantidadCarrito.textContent = parseInt(cantidadCarrito.textContent) + 1;
+
+  let cantidad = (cantidadCarrito.textContent =
+    parseInt(cantidadCarrito.textContent) + 1);
   listaPlatillos.appendChild(row);
-  guardarPlatilloLocalStorage(platillo);
+  guardarPlatilloLocalStorage(platillo, cantidad);
 }
 
 function eliminarPlatillo(e) {
@@ -93,45 +103,42 @@ function vaciarCarrito() {
   while (listaPlatillos.firstChild) {
     listaPlatillos.removeChild(listaPlatillos.firstChild);
   }
+  cantidadCarrito.textContent = 0;
   vaciarLocalStorage();
 
   return false;
 }
 
-function guardarPlatilloLocalStorage(platillo) {
-  let platillos;
-  let cantidad;
-
-  platillos = obtenerPlatillosLocalStorage();
-  cantidad = platillos.length;
-  platillos.push(platillo);
-  localStorage.setItem("platillos", JSON.stringify(platillos));
-  // localStorage.setItem('cantidad', JSON.stringify(cantidad))
+function guardarPlatilloLocalStorage(platillo, cantidad) {
+  const { platillosLS } = obtenerPlatillosLocalStorage();
+  platillosLS.push(platillo);
+  localStorage.setItem("platillos", JSON.stringify(platillosLS));
+  localStorage.setItem("cantidad", JSON.stringify(cantidad));
 }
 
-// function leerCantidadPlatillos(cantidad) {
-//     cantidadCarrito.textContent = cantidad +1
-
-// }
 function obtenerPlatillosLocalStorage() {
-  let platillosLS;
-  let cantidad;
-  if (localStorage.getItem("platillos") === null) {
+  let info = {};
+
+  if (
+    localStorage.getItem("platillos") === null ||
+    localStorage.getItem("platillos") === []
+  ) {
     platillosLS = [];
     cantidad = 0;
   } else {
     platillosLS = JSON.parse(localStorage.getItem("platillos"));
+    cantidad = JSON.parse(localStorage.getItem("cantidad"));
     // cantidad = platillosLS.length
     // leerCantidadPlatillos(cantidad)
   }
-  return platillosLS;
+  info.platillosLS = platillosLS;
+  info.cantidad = cantidad;
+  return info;
 }
 
 function leerLocalStorage() {
-  let platillosLS;
-
-  platillosLS = obtenerPlatillosLocalStorage();
-
+  const { platillosLS, cantidad } = obtenerPlatillosLocalStorage();
+  cantidadCarrito.textContent = cantidad;
   platillosLS.forEach(function (platillo) {
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -149,18 +156,24 @@ function leerLocalStorage() {
 }
 
 function eliminarPlatilloLocalStorage(platillo) {
-  let platillosLS;
-  platillosLS = obtenerPlatillosLocalStorage();
+  const { platillosLS, cantidad } = obtenerPlatillosLocalStorage();
+  let newCantidad = cantidad;
+  if (newCantidad != 0) {
+    newCantidad = cantidad - 1;
+  }
 
   platillosLS.forEach(function (platilloLS, index) {
     if (platilloLS.id === platillo) {
       platillosLS.splice(index, 1);
     }
   });
-
+  cantidadCarrito.textContent = newCantidad;
   localStorage.setItem("platillos", JSON.stringify(platillosLS));
+  localStorage.setItem("cantidad", JSON.stringify(newCantidad));
 }
 
 function vaciarLocalStorage() {
-  localStorage.clear();
+  //   localStorage.clear();
+  localStorage.setItem("platillos", JSON.stringify([]));
+  localStorage.setItem("cantidad", JSON.stringify(0));
 }

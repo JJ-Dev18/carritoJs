@@ -9,6 +9,8 @@ const contentProducts = document.getElementById("content-products");
 const templateProductos = document.getElementById("template-products").content;
 const templateCarrito = document.getElementById("template-carrito").content;
 const fragment = document.createDocumentFragment();
+const total = document.querySelector(".vacio");
+
 let carrito = {};
 let cantidad = 0 ;
 cargarEventListeners();
@@ -84,6 +86,22 @@ function setCarrito(platillo) {
   });
   pintarCarrito();
 }
+const pintarTotal = () => {
+  if (Object.keys(carrito).length === 0) {
+    total.textContent = "Carrito vacío";
+    return;
+  }
+  const nCantidad = Object.values(carrito).reduce(
+    (acc, { cantidad }) => acc + cantidad,
+    0
+  );
+  const nPrecio = Object.values(carrito).reduce(
+    (acc, { cantidad, precio }) => acc + cantidad * precio,
+    0
+  );
+  let mensaje = 'Cantidad  ' + nCantidad +'  Precio : $' + nPrecio;
+  total.textContent = mensaje;
+};
 const pintarCarrito = () => {
   listaPlatillos.innerHTML = "";
   for (const key in carrito) {
@@ -103,6 +121,7 @@ const pintarCarrito = () => {
   listaPlatillos.appendChild(fragment);
   cantidad = Object.values(carrito).length
   pintarCantidad()
+  pintarTotal()
   localStorage.setItem("carrito", JSON.stringify(carrito));
   localStorage.setItem("cantidad", JSON.stringify(cantidad));
 };
@@ -141,6 +160,7 @@ function eliminarPlatilloLocalStorage(id) {
 
   cantidad = Object.values(carrito).length;
   pintarCantidad()
+  pintarTotal()
   localStorage.setItem("carrito", JSON.stringify(carrito));
   localStorage.setItem("cantidad", JSON.stringify(cantidad));
 }

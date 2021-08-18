@@ -1,74 +1,74 @@
 [
   {
     "id" : 1,
-    "precio" : "$15",
+    "precio" : "15",
     "title" : "Hamburguesa sencilla",
     "img" : "img/platillo1.jpg"
 
   },
   {
     "id": 2,
-    "precio": "$12",
+    "precio": "12",
     "title": "Hamburguesa con papas",
     "img": "img/platillo2.jpg"
   },
   {
     "id": 3,
-    "precio": "$10",
+    "precio": "10",
     "title": "Hamburguesa con helado",
     "img": "img/platillo3.jpg"
   },
   {
     "id": 4,
-    "precio": "$15",
+    "precio": "15",
     "title": "Hamburguesa sencilla",
     "img": "img/platillo4.jpg"
   },
   {
     "id": 5,
-    "precio": "$12",
+    "precio": "12",
     "title": "Hamburguesa con papas",
     "img": "img/platillo5.jpg"
   },
   {
     "id": 6,
-    "precio": "$10",
+    "precio": "10",
     "title": "Hamburguesa con helado",
     "img": "img/platillo1.jpg"
   },
   {
     "id": 7,
-    "precio": "$15",
+    "precio": "15",
     "title": "Hamburguesa sencilla",
     "img": "img/platillo2.jpg"
   },
   {
     "id": 8,
-    "precio": "$12",
+    "precio": "12",
     "title": "Hamburguesa con papas",
     "img": "img/platillo3.jpg"
   },
   {
     "id": 9,
-    "precio": "$10",
+    "precio": "10",
     "title": "Hamburguesa con helado",
     "img": "img/platillo4.jpg"
   },
   {
     "id": 10,
-    "precio": "$15",
+    "precio": "15",
     "title": "Hamburguesa sencilla",
     "img": "img/platillo5.jpg"
   },
   {
     "id": 11,
-    "precio": "$12",
+    "precio": "12",
     "title": "Hamburguesa con papas",
     "img": "img/platillo1.jpg"
   },
   {
     "id": 12,
-    "precio": "$13",
+    "precio": "13",
     "title": "Hamburguesa con helado",
     "img": "img/platillo2.jpg"
   }

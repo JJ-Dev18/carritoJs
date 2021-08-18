@@ -29,12 +29,14 @@
                                             <th>Imagen</th>
                                             <th>Platillos</th>
                                             <th>Precio</th>
+                                             <th>Cantidad</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                      
+                                    <tbody >
+                                     
                                     </tbody>
                                 </table>
+                                
                                 <a href="#" id='vaciar-carrito' class="button u-full-width">vaciar carrito</a>
                             </div>
                         </li>
@@ -99,13 +101,26 @@
                         <h4>Hamburguesa con helado</h4>
                         <p>Bebida ilimitada</p>
                         <img src="img/estrellas.png">
-                        <p class="precio">$50 <span class="u-pull-right">$15</span> </p>
+                        <p class="precio">$50 <span class="u-pull-right">$ <strong> 50</strong></span> </p>
                         <a href="#" class="u-full-width button-primary button input agregar-carrito" >Agregar al carrito</a>
                     </div>
                 </div>
             </div>
     </template>
-
+   <template id='template-carrito'>
+       
+           <tr >
+               <td >
+                   <img  src="img/estrellas.png" width=100> 
+               </td> 
+               <td>we</td>
+               <td >wew</td>
+               <td > $<span></span></td>
+               <td >
+                   <a href="#" class="borrar-platillo" data-id="">X</a>
+               </td>
+           </tr>
+    </template>
 
     <footer class="footer"> 
         <div class="container">

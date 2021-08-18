@@ -1,35 +1,47 @@
 // import Swal from "sweetalert2";
 
-const carrito = document.getElementById("carrito");
+const itemCarrito = document.getElementById("carrito");
 const platillos = document.getElementById("lista-platillos");
 const listaPlatillos = document.querySelector("#lista-carrito tbody");
 const vaciarCarritoBtn = document.getElementById("vaciar-carrito");
 const cantidadCarrito = document.getElementById("cantidad-carrito");
 const contentProducts = document.getElementById("content-products");
 const templateProductos = document.getElementById("template-products").content;
-const fragmentProductos = document.createDocumentFragment();
+const templateCarrito = document.getElementById("template-carrito").content;
+const fragment = document.createDocumentFragment();
+let carrito = {};
+let cantidad = 0 ;
 cargarEventListeners();
-
+console.log(carrito.length)
 function cargarEventListeners() {
-  platillos.addEventListener("click", comprarPlatillo);
-  carrito.addEventListener("click", eliminarPlatillo);
+  platillos.addEventListener("click", addCarrito);
+  itemCarrito.addEventListener("click", eliminarPlatillo);
   vaciarCarritoBtn.addEventListener("click", vaciarCarrito);
   document.addEventListener("DOMContentLoaded", () => {
     fetchData();
-    leerLocalStorage();
+    if (localStorage.getItem("carrito")) {
+      carrito = JSON.parse(localStorage.getItem("carrito"));
+      cantidad = JSON.parse(localStorage.getItem("cantidad"));
+      pintarCarrito();
+      
+    }
+    pintarCantidad()
   });
+}
+const pintarCantidad = ()=>{
+  cantidadCarrito.textContent = cantidad;
 }
 const cargarProductos = (data) => {
   data.forEach((producto) => {
     templateProductos.querySelector("h4").textContent = producto.title;
     templateProductos.querySelector(".imagen-platillo").src = producto.img;
-    templateProductos.querySelector(".precio span").textContent =
+    templateProductos.querySelector(".u-pull-right strong").textContent =
       producto.precio;
     templateProductos.querySelector("a").setAttribute("data-id", producto.id);
     const productos = templateProductos.cloneNode(true);
-    fragmentProductos.appendChild(productos);
+    fragment.appendChild(productos);
   });
-  contentProducts.appendChild(fragmentProductos);
+  contentProducts.appendChild(fragment);
 };
 const fetchData = async () => {
   try {
@@ -42,21 +54,27 @@ const fetchData = async () => {
   }
 };
 
-function comprarPlatillo(e) {
+function addCarrito(e) {
   e.preventDefault();
   if (e.target.classList.contains("agregar-carrito")) {
-    const platillo = e.target.parentElement.parentElement;
-    leerDatosPlatillo(platillo);
+    setCarrito(e.target.parentElement.parentElement);
+    // leerDatosPlatillo(platillo);
   }
+  e.stopPropagation();
 }
 
-function leerDatosPlatillo(platillo) {
+function setCarrito(platillo) {
   const infoPlatillo = {
     imagen: platillo.querySelector("img").src,
     titulo: platillo.querySelector("h4").textContent,
-    precio: platillo.querySelector(".precio span").textContent,
+    precio: platillo.querySelector(".u-pull-right strong").textContent,
     id: platillo.querySelector("a").getAttribute("data-id"),
+    cantidad: 1,
   };
+  if (carrito.hasOwnProperty(infoPlatillo.id)) {
+    infoPlatillo.cantidad = carrito[infoPlatillo.id].cantidad + 1;
+  }
+  carrito[infoPlatillo.id] = { ...infoPlatillo };
   Swal.fire({
     position: "top-end",
     icon: "success",
@@ -64,27 +82,30 @@ function leerDatosPlatillo(platillo) {
     showConfirmButton: false,
     timer: 1500,
   });
-  insertarCarrito(infoPlatillo);
+  pintarCarrito();
 }
+const pintarCarrito = () => {
+  listaPlatillos.innerHTML = "";
+  for (const key in carrito) {
+    templateCarrito.querySelectorAll("td")[0].firstElementChild.src =
+      carrito[key].imagen;
+    templateCarrito.querySelectorAll("td")[1].textContent = carrito[key].titulo;
+    templateCarrito.querySelectorAll("td")[2].textContent =
+      carrito[key].precio * carrito[key].cantidad;
+    templateCarrito.querySelectorAll("td")[3].textContent =
+      carrito[key].cantidad;
+    templateCarrito.querySelectorAll("td")[4].firstElementChild.setAttribute('data-id', carrito[key].id);
+    
 
-function insertarCarrito(platillo) {
-  const row = document.createElement("tr");
-  row.innerHTML = `
-       <td>
-           <img src="${platillo.imagen}" width=100> 
-       </td> 
-       <td>${platillo.titulo}</td>
-       <td>${platillo.precio}</td>
-       <td>
-        <a href="#" class="borrar-platillo" data-id="${platillo.id}">X</a>
-       </td>
-    `;
-
-  let cantidad = (cantidadCarrito.textContent =
-    parseInt(cantidadCarrito.textContent) + 1);
-  listaPlatillos.appendChild(row);
-  guardarPlatilloLocalStorage(platillo, cantidad);
-}
+    const productos = templateCarrito.cloneNode(true);
+    fragment.appendChild(productos);
+  }
+  listaPlatillos.appendChild(fragment);
+  cantidad = Object.values(carrito).length
+  pintarCantidad()
+  localStorage.setItem("carrito", JSON.stringify(carrito));
+  localStorage.setItem("cantidad", JSON.stringify(cantidad));
+};
 
 function eliminarPlatillo(e) {
   e.preventDefault();
@@ -96,84 +117,35 @@ function eliminarPlatillo(e) {
     platillo = e.target.parentElement.parentElement;
     platilloId = platillo.querySelector("a").getAttribute("data-id");
   }
+  
   eliminarPlatilloLocalStorage(platilloId);
+
+  e.stopPropagation()
 }
 
 function vaciarCarrito() {
-  while (listaPlatillos.firstChild) {
-    listaPlatillos.removeChild(listaPlatillos.firstChild);
-  }
   cantidadCarrito.textContent = 0;
+  carrito = {};
+  pintarCarrito();
   vaciarLocalStorage();
 
   return false;
 }
 
-function guardarPlatilloLocalStorage(platillo, cantidad) {
-  const { platillosLS } = obtenerPlatillosLocalStorage();
-  platillosLS.push(platillo);
-  localStorage.setItem("platillos", JSON.stringify(platillosLS));
+
+function eliminarPlatilloLocalStorage(id) {
+  
+  if (carrito.hasOwnProperty(id)) {
+    delete carrito[id];
+  }
+
+  cantidad = Object.values(carrito).length;
+  pintarCantidad()
+  localStorage.setItem("carrito", JSON.stringify(carrito));
   localStorage.setItem("cantidad", JSON.stringify(cantidad));
 }
 
-function obtenerPlatillosLocalStorage() {
-  let info = {};
-
-  if (
-    localStorage.getItem("platillos") === null ||
-    localStorage.getItem("platillos") === []
-  ) {
-    platillosLS = [];
-    cantidad = 0;
-  } else {
-    platillosLS = JSON.parse(localStorage.getItem("platillos"));
-    cantidad = JSON.parse(localStorage.getItem("cantidad"));
-    // cantidad = platillosLS.length
-    // leerCantidadPlatillos(cantidad)
-  }
-  info.platillosLS = platillosLS;
-  info.cantidad = cantidad;
-  return info;
-}
-
-function leerLocalStorage() {
-  const { platillosLS, cantidad } = obtenerPlatillosLocalStorage();
-  cantidadCarrito.textContent = cantidad;
-  platillosLS.forEach(function (platillo) {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-            <td>
-                <img src="${platillo.imagen}" width=100>
-            </td>
-            <td>${platillo.titulo}</td>
-            <td>${platillo.precio}</td>
-            <td>
-                <a href="#" class="borrar-platillo" data-id="${platillo.id}">X</a>
-            </td>
-        `;
-    listaPlatillos.appendChild(row);
-  });
-}
-
-function eliminarPlatilloLocalStorage(platillo) {
-  const { platillosLS, cantidad } = obtenerPlatillosLocalStorage();
-  let newCantidad = cantidad;
-  if (newCantidad != 0) {
-    newCantidad = cantidad - 1;
-  }
-
-  platillosLS.forEach(function (platilloLS, index) {
-    if (platilloLS.id === platillo) {
-      platillosLS.splice(index, 1);
-    }
-  });
-  cantidadCarrito.textContent = newCantidad;
-  localStorage.setItem("platillos", JSON.stringify(platillosLS));
-  localStorage.setItem("cantidad", JSON.stringify(newCantidad));
-}
-
 function vaciarLocalStorage() {
-  //   localStorage.clear();
-  localStorage.setItem("platillos", JSON.stringify([]));
+  localStorage.setItem("carrito", JSON.stringify({}));
   localStorage.setItem("cantidad", JSON.stringify(0));
 }
